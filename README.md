@@ -253,8 +253,25 @@ The server will be running at **http://localhost:3000**
 
 ---
 
+---
+## 🌍 Live API
+
+Base URL:
+
+https://your-render-url.onrender.com
+
+### Health Check
+
+GET https://your-render-url.onrender.com/health
+
+### Identify Endpoint
+
+POST https://your-render-url.onrender.com/identify
+---
+
 ## 👨‍💻 Author
 
 **Amol Raut**
 Bitespeed Backend Task Submission
+
 
