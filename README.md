@@ -262,11 +262,11 @@ https://bitespeed-identity-z3uu.onrender.com
 
 ### Health Check
 
-GET [https://your-render-url.onrender.com/health](https://bitespeed-identity-z3uu.onrender.com/health)
+GET (https://bitespeed-identity-z3uu.onrender.com/health)
 
 ### Identify Endpoint
 
-GET [https://your-render-url.onrender.com/identify](https://bitespeed-identity-z3uu.onrender.com/identify)
+POST (https://bitespeed-identity-z3uu.onrender.com/identify)
 
 ---
 
@@ -274,6 +274,7 @@ GET [https://your-render-url.onrender.com/identify](https://bitespeed-identity-z
 
 **Amol Raut**
 Bitespeed Backend Task Submission
+
 
 
 
