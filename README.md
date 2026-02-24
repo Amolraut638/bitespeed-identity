@@ -262,18 +262,20 @@ https://bitespeed-identity-z3uu.onrender.com
 
 ### Health Check
 
-GET (https://bitespeed-identity-z3uu.onrender.com/health)
+GET https://bitespeed-identity-z3uu.onrender.com/health
 
 ### Identify Endpoint
 
-POST (https://bitespeed-identity-z3uu.onrender.com/identify)
+POST https://bitespeed-identity-z3uu.onrender.com/identify
 
 ---
 
 ## 👨‍💻 Author
 
 **Amol Raut**
+
 Bitespeed Backend Task Submission
+
 
 
 
