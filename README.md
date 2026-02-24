@@ -1,69 +1,59 @@
-Bitespeed Backend Task – Identity Reconciliation
-🚀 Overview
+# 🔗 Bitespeed Backend Task – Identity Reconciliation
 
-This project implements the Identity Reconciliation Service described in the Bitespeed Backend Assignment.
+A backend service that consolidates multiple customer contact records based on shared email addresses or phone numbers. Built as part of the **Bitespeed Backend Assignment**.
 
-The service consolidates multiple contact records belonging to the same customer based on shared email addresses or phone numbers.
+---
 
-It exposes a single REST endpoint:
+## 📋 Table of Contents
 
-POST /identify
+- [Overview](#overview)
+- [Tech Stack](#tech-stack)
+- [Database Schema](#database-schema)
+- [API Documentation](#api-documentation)
+- [Reconciliation Logic](#reconciliation-logic)
+- [Example Scenarios](#example-scenarios)
+- [Getting Started](#getting-started)
+- [Design Considerations](#design-considerations)
 
-The system ensures:
+---
 
-Contacts sharing either email OR phone are linked
+## Overview
 
-The oldest contact remains primary
+Customers may place orders using different combinations of email addresses and phone numbers. Over time, multiple contact entries can exist for the same person.
 
-New linked contacts become secondary
+This service exposes a single REST endpoint — `POST /identify` — that:
 
-Multiple primary records are merged correctly
+- Identifies whether a contact already exists
+- Links related contacts together
+- Maintains a single primary contact per customer
+- Converts newer primaries into secondaries when needed
+- Returns a clean, consolidated response
 
-Response format strictly follows the specification
+---
 
-🧠 Problem Statement
+## Tech Stack
 
-Customers may place orders using different combinations of:
+| Layer | Technology |
+|-------|-----------|
+| Runtime | Node.js |
+| Framework | Express |
+| Language | TypeScript |
+| ORM | Prisma |
+| Database | PostgreSQL (Cloud – Render) |
 
-Email addresses
+---
 
-Phone numbers
+## Database Schema
 
-Over time, multiple contact entries may exist for the same person.
-
-The system must:
-
-Identify whether a contact already exists
-
-Link related contacts
-
-Maintain a single primary contact
-
-Convert newer primaries into secondaries if needed
-
-Return a consolidated response
-
-🏗 Tech Stack
-
-Node.js
-
-Express
-
-TypeScript
-
-Prisma ORM
-
-PostgreSQL (Cloud – Render)
-
-🗄 Database Schema
+```prisma
 model Contact {
-  id             Int      @id @default(autoincrement())
+  id             Int            @id @default(autoincrement())
   phoneNumber    String?
   email          String?
   linkedId       Int?
   linkPrecedence LinkPrecedence
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
   deletedAt      DateTime?
 }
 
@@ -71,76 +61,80 @@ enum LinkPrecedence {
   primary
   secondary
 }
-🔗 Identity Reconciliation Logic
-1️⃣ New Contact
+```
 
-If no existing contact matches the provided email or phone:
+---
 
-Create a new primary contact.
+## API Documentation
 
-2️⃣ Matching Contact with New Information
+### `POST /identify`
 
-If an existing contact matches (via email or phone) but new information is provided:
+Identifies and consolidates a contact based on the provided email and/or phone number.
 
-Create a new secondary contact
+#### Request Body
 
-Link it to the primary using linkedId
-
-3️⃣ Merging Multiple Primaries
-
-If a request connects two previously separate primary contacts:
-
-The oldest contact remains primary
-
-The newer primary becomes secondary
-
-All related contacts are consolidated
-
-4️⃣ Transaction Safety
-
-All reconciliation logic runs inside a database transaction to ensure:
-
-Data consistency
-
-No partial merges
-
-No duplicate linking
-
-📡 API Documentation
-Endpoint
-POST /identify
-Request Body (JSON)
+```json
 {
   "email": "string (optional)",
   "phoneNumber": "string (optional)"
 }
+```
 
-At least one field must be provided.
+> ⚠️ At least one of `email` or `phoneNumber` must be provided.
 
-✅ Response Format
+#### Response
+
+```json
 {
   "contact": {
-    "primaryContatctId": number,
+    "primaryContatctId": 1,
     "emails": ["string"],
     "phoneNumbers": ["string"],
-    "secondaryContactIds": [number]
+    "secondaryContactIds": [2, 3]
   }
 }
+```
 
-Note: The key primaryContatctId matches the assignment specification exactly.
+> **Note:** The key `primaryContatctId` matches the assignment specification exactly (intentional typo preserved).
 
-🧪 Example Scenarios
-Example 1 – New Contact
+---
 
-Request
+## Reconciliation Logic
 
+### 1. New Contact
+If no existing contact matches the provided email or phone, a **new primary contact** is created.
+
+### 2. Matching Contact with New Information
+If an existing contact matches but new information is provided (e.g., a new email with an existing phone number), a **new secondary contact** is created and linked to the primary via `linkedId`.
+
+### 3. Merging Multiple Primaries
+If a request connects two previously separate primary contacts:
+- The **oldest contact** remains primary
+- The **newer primary** is demoted to secondary
+- All related contacts are consolidated under the single primary
+
+### 4. Transaction Safety
+All reconciliation logic runs inside a **database transaction** to ensure:
+- Data consistency
+- No partial merges
+- No duplicate linking
+
+---
+
+## Example Scenarios
+
+### Example 1 – New Contact
+
+**Request**
+```json
 {
   "email": "lorraine@hillvalley.edu",
   "phoneNumber": "123456"
 }
+```
 
-Response
-
+**Response**
+```json
 {
   "contact": {
     "primaryContatctId": 1,
@@ -149,17 +143,22 @@ Response
     "secondaryContactIds": []
   }
 }
-Example 2 – Same Phone, New Email
+```
 
-Request
+---
 
+### Example 2 – Same Phone, New Email
+
+**Request**
+```json
 {
   "email": "mcfly@hillvalley.edu",
   "phoneNumber": "123456"
 }
+```
 
-Response
-
+**Response**
+```json
 {
   "contact": {
     "primaryContatctId": 1,
@@ -171,73 +170,90 @@ Response
     "secondaryContactIds": [2]
   }
 }
-Example 3 – Merge Two Primaries
+```
 
-If two separate primaries exist:
+---
 
-Primary A: george@hillvalley.edu
- – 919191
+### Example 3 – Merging Two Primaries
 
-Primary B: biffsucks@hillvalley.edu
- – 717171
+Given two separate primary contacts:
 
-Request
+| Contact | Email | Phone |
+|---------|-------|-------|
+| Primary A | george@hillvalley.edu | 919191 |
+| Primary B | biffsucks@hillvalley.edu | 717171 |
 
+**Request**
+```json
 {
   "email": "george@hillvalley.edu",
   "phoneNumber": "717171"
 }
+```
 
-Result
+**Result:** The oldest contact remains primary. The newer primary is demoted to secondary, and a fully consolidated response is returned.
 
-Oldest remains primary
+---
 
-Newer primary becomes secondary
+## Getting Started
 
-Consolidated response returned
+### Prerequisites
 
-🌍 Live Deployment
+- Node.js (v18+)
+- PostgreSQL database (local or cloud)
 
-Backend Hosted URL:
+### Installation
 
-(To be added after deployment)
-🛠 How to Run Locally
+1. **Clone the repository**
+   ```bash
+   git clone <repo-url>
+   cd <project-folder>
+   ```
 
-Clone repository
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-Install dependencies
+3. **Configure environment variables**
 
-npm install
+   Create a `.env` file in the root directory:
+   ```env
+   DATABASE_URL=your_postgresql_connection_string
+   PORT=3000
+   ```
 
-Create .env file
+4. **Sync the database schema**
+   ```bash
+   npx prisma db push
+   ```
 
-DATABASE_URL=your_postgresql_connection_string
-PORT=3000
+5. **Start the development server**
+   ```bash
+   npm run dev
+   ```
 
-Sync database
+The server will be running at **http://localhost:3000**
 
-npx prisma db push
+---
 
-Start server
+## Design Considerations
 
-npm run dev
+- **Transactional Logic** — All reconciliation operations run in a single database transaction to prevent inconsistent or partial merges.
+- **Primary Preservation** — The oldest contact is always retained as primary; newer duplicates are demoted.
+- **Deduplication** — Emails and phone numbers in the response are always unique.
+- **Cloud Ready** — Fully compatible with cloud PostgreSQL deployments (e.g., Render).
+- **Spec Compliant** — Response format strictly follows the Bitespeed assignment specification.
 
-Server runs at:
+---
 
-http://localhost:3000
-📌 Design Considerations
+## 🌍 Live Deployment
 
-Uses transactional logic to prevent inconsistent merges
+> Backend Hosted URL: *(To be added after deployment)*
 
-Ensures oldest contact remains primary
+---
 
-Prevents duplicate emails and phone numbers
+## 👨‍💻 Author
 
-Fully compatible with cloud deployment
-
-Clean commit history maintained as per instructions
-
-👨‍💻 Author
-
-Amol Raut
+**Amol Raut**
 Bitespeed Backend Task Submission
