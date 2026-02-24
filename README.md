@@ -258,20 +258,22 @@ The server will be running at **http://localhost:3000**
 
 Base URL:
 
-https://your-render-url.onrender.com
+https://bitespeed-identity-z3uu.onrender.com
 
 ### Health Check
 
-GET https://your-render-url.onrender.com/health
+GET [https://your-render-url.onrender.com/health](https://bitespeed-identity-z3uu.onrender.com/health)
 
 ### Identify Endpoint
 
-POST https://your-render-url.onrender.com/identify
+GET [https://your-render-url.onrender.com/identify](https://bitespeed-identity-z3uu.onrender.com/identify)
+
 ---
 
 ## 👨‍💻 Author
 
 **Amol Raut**
 Bitespeed Backend Task Submission
+
 
 
