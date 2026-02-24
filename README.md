@@ -249,7 +249,7 @@ The server will be running at **http://localhost:3000**
 
 ## 🌍 Live Deployment
 
-> Backend Hosted URL: *(To be added after deployment)*
+> Backend Hosted URL: *(https://bitespeed-identity-z3uu.onrender.com)*
 
 ---
 
@@ -257,3 +257,4 @@ The server will be running at **http://localhost:3000**
 
 **Amol Raut**
 Bitespeed Backend Task Submission
+
