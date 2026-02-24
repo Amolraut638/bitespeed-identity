@@ -206,8 +206,8 @@ Given two separate primary contacts:
 
 1. **Clone the repository**
    ```bash
-   git clone <repo-url>
-   cd <project-folder>
+   git clone https://github.com/Amolraut638/bitespeed-identity.git
+   cd bitespeed-identity
    ```
 
 2. **Install dependencies**
@@ -275,6 +275,7 @@ POST https://bitespeed-identity-z3uu.onrender.com/identify
 **Amol Raut**
 
 Bitespeed Backend Task Submission
+
 
 
 
